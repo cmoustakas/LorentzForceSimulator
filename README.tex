@@ -1,2 +1,163 @@
-# LorentzForceSimulator
-Simulation of a particle's behaviour near a charged stick
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{tikz}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+
+
+\fancyhead{}
+\fancyhead[RO,LE]{Lorentz Force Simulator}
+\fancyfoot{}
+\fancyfoot[LE,RO]{\thepage}
+\fancyfoot[LO,CE]{Section \thesection}
+\fancyfoot[CO,RE]{Chares Moustakas}
+
+\usetikzlibrary{shapes.geometric, arrows}
+
+\title{
+	{
+	Lorentz Force Simulator \\
+	\vspace{3cm}
+	} \\
+	
+}
+\author{Chares Moustakas}
+\date{15/12/2022}
+
+
+
+\begin{document}
+
+	\maketitle
+
+
+
+
+\section{Introduction}
+	\paragraph{}
+	The current software is attempting to simulate the behaviour of a particle near a finite long charged wire. It is important to underline that the aforementioned software is just a fun, non-optimized project and as a consequence the reader can feel free to use, modify, improve and play with it. It is notable to mention that this software was developed in C++ using relatively low level APIs and Libraries such as modern OpenGL, custom fragment-vertex shaders through GLSL, Dear ImGUI and CMake, while all the Objects-meshes were constructed through Blender.     
+
+\section{Mathematics}
+	\paragraph{}
+	The concept of this simulation is to calculate the Lorentz Force that the wire exterts to the spherical particle, using primarily the current that flows through the wire as a datum. To begin with, it is crucial to visualize from the Mathematical perspective the goal, being said that the formula for the precious calculation is:  
+			\begin{equation*}
+			\overrightarrow{\rm F_{L}} = q(\overrightarrow{\rm E} + \overrightarrow{\rm u} \times \overrightarrow{\rm B})
+			\end{equation*}
+	
+	\paragraph{}
+	Where q is Coulomb charge of the particle, \textbf{E} the electric field, \textbf{u} particle's velocity and \textbf{B} the magnetic's field flux density. 
+	\subsection{B calculation}
+	\paragraph{}
+	The calculation of \textbf{B} is based on Ampere's formula:
+			\begin{equation*}
+			\oint_C \overrightarrow{\rm B}\overrightarrow{\rm dl} = \mu I
+			\end{equation*}
+	Due to \textbf{B} and \textbf{dl} parallelism, the equation above is tranformed as:
+			\paragraph{}
+			\begin{equation*}
+			\overrightarrow{\rm |B|} \oint_C dl &= \mu I \\
+			\end{equation*}
+			
+			\begin{equation*}
+			\overrightarrow{\rm |B|} 2\pi r &= \mu I \\
+			\end{equation*}
+			
+			\begin{equation*}
+			\overrightarrow{\rm |B|} &= \dfrac{\mu I}{2\pi r}  \\
+			\end{equation*}
+			
+			\begin{equation*}
+			\overrightarrow{\rm B} &= \dfrac{\mu I}{2\pi r} \hat{\phi} 
+			\end{equation*}
+			
+			
+			Cylindrical Coordinates:
+			\begin{equation*}
+			\hat{\phi} = -\dfrac{z}{r}\hat{x} + \dfrac{x}{r}\hat{z}  
+			\end{equation*}
+			
+	It is notable that the direction of \textbf{B} is tangent to the closed circle-loop C. Consequently \textbf{B} calculation is possible if the position of the particle and the current are known magnitudes.
+	
+	\subsection{E calculation}
+	\paragraph{}
+	Regarding Electric field calculation, patience is the key... So lets construct the main acceptance, first of all lets assume that the wire has \textbf{L} length. An infinitesmal charged part of the wire \textbf{dq} that is \textbf{y} units away from the end of the cable causes  Electric field \textbf{dE} for a random point P that it is \textbf{r} units away from the wire:
+		    
+		    \begin{figure}[H]
+  			\includegraphics[width=\linewidth]{/home/robin/Pictures/lorentz.png}
+  			\caption{ Calculation of Electric field}
+			\centering
+		    \end{figure}
+		    
+		    
+		    \begin{align*}
+		    \dfrac{dq}{dy} &= \dfrac{Q}{L} \\
+		    dq &= \dfrac{Q}{L} dy
+		    \end{align*}
+		    
+		    \begin{equation} 
+		    \overrightarrow{\rm dE} &= dE_y sin\theta \hat{y} + dE_r cos\theta \hat{r}
+		    \end{equation}
+		    
+		    \begin{equation}
+		    sin\theta = \dfrac{y}{\sqrt{y^2 + r^2}},
+		    cos\theta = \dfrac{r}{\sqrt{y^2 + r^2}}
+		    \end{equation}
+		    
+		    \begin{equation*} 
+		    dE &= k \dfrac{dq}{y^2 + r^2}
+		    \end{equation*}\vspace{1cm}
+		    Based on the above:
+		    \begin{equation*} 
+		    dE_y &= k \dfrac{Q}{L}\dfrac{y}{\sqrt{(y^2 + r^2)^3}}dy
+		    \end{equation*}
+		    
+		    \begin{equation*}
+		    \int_{0}^{E_y} dE_y = k \dfrac{Q}{L} \int_{-L/2}^{L/2} \dfrac{y}{\sqrt{(y^2 + r^2)^3}} dy
+		    = k\dfrac{Q}{L}( \dfrac{-1}{\sqrt{(r^2 + \dfrac{L^2}{4})}} + \dfrac{1}{\sqrt{(r^2 + \dfrac{L^2}{4})}} )
+		    \end{equation*} 
+		    
+		    \begin{equation*}
+		    E_y = 0
+		    \end{equation*}
+		    The only non zero coordinate is the coordinate of r unit vector, based on the (1) ! Lets calculate the r coordinate.
+		    
+		    \begin{equation*}
+		     dE_r &= k \dfrac{Q}{L}\dfrac{r}{\sqrt{(y^2 + r^2)^3}} dy
+		    \end{equation*}
+		     
+		    \begin{equation*}
+		    \int_{0}^{E_r} dE_r = k \dfrac{Q}{L} \int_{-L/2}^{L/2} \dfrac{r}{\sqrt{(y^2 + r^2)^3}} dy
+		    = k \dfrac{Q}{L} ( \dfrac{L/2}{r \sqrt{(r^2 + \dfrac{L^2}{4})}} + \dfrac{L/2}{r \sqrt{(r^2 + \dfrac{L^2}{4})}})
+		    \end{equation*}
+		    
+		    \begin{equation*}
+		    E_r = k \dfrac{Q}{r\sqrt{r^2 + \dfrac{L^2}{4}}}
+		    \end{equation*}
+		    
+		    \paragraph{}
+		    Consequently, the expression (1) can be written as:
+
+		    \begin{equation}
+		    \overrightarrow{\rm E} =  k \dfrac{Q}{r\sqrt{r^2 + \dfrac{L^2}{4}}} \hat{r}
+		    \end{equation}		    
+		    
+		    Cylindrical coordinates:
+		    \begin{equation*}
+		    \hat{r} = \dfrac{x}{r} + \dfrac{z}{r}
+		    \end{equation*}
+		    
+		    
+		    \paragraph{}
+		    It is crucial to keep in mind that the Coulomb charge \textbf{Q} is not constant in time, therefore on each OpenGL iteration the expression (3), concerning the Electric field calculation, is taken into account: 
+		    \begin{equation*}
+		    I = \dfrac{dQ}{dt}
+		    \end{equation*}
+		    
+		    
+		    
+\end{document}
