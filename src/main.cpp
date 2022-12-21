@@ -6,6 +6,8 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <filesystem>
+#include <cstring>
 
 /**
 #include <cuda.h>
@@ -57,6 +59,10 @@ bool pause_sig = false;
 
 int main( void )
 {
+	// First of all take the filepath that we interested in:
+	std::filesystem::path cwd = std::filesystem::current_path();
+	cwd.replace_filename("src");
+	
     // First and foremost create a sphere
     sphere *sphere_obj = new sphere();
 
@@ -68,10 +74,13 @@ int main( void )
 	create_bind_VAO(vertex_array_ID);
 	
 	//Create my pipeline Links from Shaders
+	std::string fragment_shader_path = "/shaders/TextureFragmentShader.glsl";
+	std::string vertex_shader_path = "/shaders/TransformVertexShader.glsl";
 	GLuint program_Id = load_shaders(
-    "/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/src/shaders/TextureFragmentShader.glsl",
-    "/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/src/shaders/TransformVertexShader.glsl");
+    								(cwd.string() + fragment_shader_path).c_str(),
+    								(cwd.string() + vertex_shader_path).c_str()  );
 	
+
     //Link my matrix_Id with the uniform model, model view projection
 	GLuint matrix_Id    = glGetUniformLocation(program_Id, "model_mat");
 	GLuint view_Id 		= glGetUniformLocation(program_Id,"view_mat");
@@ -79,13 +88,32 @@ int main( void )
 	GLuint rotation_Id  = glGetUniformLocation(program_Id,"rotation_mat");
 	GLuint translate_Id = glGetUniformLocation(program_Id,"translation_mat");
 	
+	std::string fragment_shader_path_arr = "/shaders/ArrowFragmentShader.glsl";
+	std::string vertex_shader_path_arr   = "/shaders/ArrowVertexShader.glsl";
+
+    //Create arrow objects
+    GLuint arrow_shader_Id = load_shaders(
+    									  (cwd.string() + fragment_shader_path_arr).c_str(),
+    									  (cwd.string() + vertex_shader_path_arr).c_str()  );
+
+
+	std::string fragment_shader_path_txt = "/shaders/TextFragmentShader.glsl";
+	std::string vertex_shader_path_txt   = "/shaders/TextVertexShader.glsl";
+
+    //Create a Text Renderer;
+    text_render *text = new text_render(
+        load_shaders((cwd.string() + fragment_shader_path_txt).c_str(),
+                     (cwd.string() + vertex_shader_path_txt).c_str()),
+		(cwd.remove_filename()).string()                                
+    );
+
 	
 	//Create texture_wire and link it to the uniform of the fragment shader
+	
 	GLuint texture_wire = loadDDS(
-    "/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/textures_n_objects/copper.dds");
-
+    (cwd.string() + "/textures_n_objects/copper.dds").c_str());
 	GLuint texture_sphere = loadDDS(
-    "/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/textures_n_objects/sphere.dds");
+    (cwd.string() + "/textures_n_objects/sphere.dds").c_str());
 
 	GLuint texture_ID  = glGetUniformLocation(program_Id, "myTextureSampler");
 	
@@ -94,14 +122,14 @@ int main( void )
 	std::vector<glm::vec2> uvs_wire;
 	std::vector<glm::vec3> normals_wire; 
 	
-    bool res = loadOBJ("/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/textures_n_objects/wire.obj",
+    bool res = loadOBJ((cwd.string() + "/textures_n_objects/wire.obj").c_str(),
                         vertices_wire, uvs_wire, normals_wire);
 
 	
 	std::vector<glm::vec3> vertices_sphere;
 	std::vector<glm::vec2> uvs_sphere;
 	std::vector<glm::vec3> normals_sphere;
-	res = loadOBJ("/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/textures_n_objects/mysphere.obj",
+	res = loadOBJ((cwd.string() + "/textures_n_objects/mysphere.obj").c_str(),
                    vertices_sphere,uvs_sphere,normals_sphere);
 
 
@@ -117,7 +145,7 @@ int main( void )
 		create_bind_VBO(vertex_buffer_sphere,vertices_sphere) == FAIL ||
 		create_bind_VBO(vertex_buffer_uvs_sphere,uvs_sphere) == FAIL
 	) 
-	return -1;
+		return -1;
 	
 	
 
@@ -126,21 +154,13 @@ int main( void )
     const glm::mat4	ProjectioImGui_ImplGlfw_InitnMatrix = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 3000.0f);
     const glm::mat4 ViewMatrix = camera_obj->get_camera_model();
 
-    //Create a Text Renderer;
-    text_render *text = new text_render(
-        load_shaders("/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/src/shaders/TextFragmentShader.glsl",
-                     "/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/src/shaders/TextVertexShader.glsl")                  
-    );
-    
-    //Create arrow objects
-    GLuint arrow_shader_Id = load_shaders("/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/src/shaders/ArrowFragmentShader.glsl",
-                                          "/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/src/shaders/ArrowVertexShader.glsl");
-    char* path_obj_arrow = "/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/textures_n_objects/current_arrow.obj";
-    arrow *I_arrow = new arrow(path_obj_arrow,arrow_shader_Id,glm::vec3(1.0f,1.0f,0.2f));
-    arrow *B_arrow = new arrow(path_obj_arrow,arrow_shader_Id,glm::vec3(0.0f,1.0f,0.0f));
-    arrow *E_arrow = new arrow(path_obj_arrow,arrow_shader_Id,glm::vec3(1.0f,0.0f,0.0f));
-    arrow *u_arrow = new arrow(path_obj_arrow,arrow_shader_Id,glm::vec3(0.0f,1.0f,1.0f));
-    arrow *F_arrow = new arrow(path_obj_arrow,arrow_shader_Id,glm::vec3(1.0f,1.0f,1.0f));
+    std::string path_obj_arrow = "/textures_n_objects/current_arrow.obj";
+	path_obj_arrow = cwd.string() + path_obj_arrow;
+    arrow *I_arrow = new arrow(path_obj_arrow.c_str(),arrow_shader_Id,glm::vec3(1.0f,1.0f,0.2f));
+    arrow *B_arrow = new arrow(path_obj_arrow.c_str(),arrow_shader_Id,glm::vec3(0.0f,1.0f,0.0f));
+    arrow *E_arrow = new arrow(path_obj_arrow.c_str(),arrow_shader_Id,glm::vec3(1.0f,0.0f,0.0f));
+    arrow *u_arrow = new arrow(path_obj_arrow.c_str(),arrow_shader_Id,glm::vec3(0.0f,1.0f,1.0f));
+    arrow *F_arrow = new arrow(path_obj_arrow.c_str(),arrow_shader_Id,glm::vec3(1.0f,1.0f,1.0f));
 
 
     //Set initial states for my arrows

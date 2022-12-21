@@ -93,7 +93,7 @@ double amplitude_of_vector(glm::vec3 v){
 
 
 
-int get_shader_code_and_compile(GLuint &shaderID, const char* path){
+int get_shader_code_and_compile(GLuint &shaderID, const char * path){
 	// Read the Vertex Shader code from the file
 	std::string shader_code;
 	std::ifstream shader_stream(path, std::ios::in);
@@ -130,7 +130,7 @@ int get_shader_code_and_compile(GLuint &shaderID, const char* path){
 }
 
 
-int load_shaders(const char* fragment_shader_path, const char* vertex_shader_path){
+int load_shaders(const char *fragment_shader_path, const char* vertex_shader_path){
 	
 	GLuint vertex_shader_Id = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragment_shader_Id = glCreateShader(GL_FRAGMENT_SHADER);
@@ -173,8 +173,9 @@ int load_shaders(const char* fragment_shader_path, const char* vertex_shader_pat
 }
 
 
-text_render::text_render(unsigned int shader_ID){
-	initText2D( "/home/robin/Desktop/C++DEMOS/LorentzForceSimulator/textures_n_objects/Holstein.DDS"
+text_render::text_render(unsigned int shader_ID, std::string working_dir){
+
+	initText2D((working_dir+"/textures_n_objects/Holstein.DDS").c_str()
 			   ,shader_ID);
 }
 

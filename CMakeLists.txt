@@ -1,12 +1,13 @@
 # CMake entry point
 cmake_minimum_required (VERSION 3.0)
-project (Lorentz LANGUAGES  CUDA  CXX C )
+project (Lorentz LANGUAGES   CXX C )
+#project (Lorentz LANGUAGES  CUDA CXX C )
 
-enable_language(CUDA)
-include(CheckLanguage)
-check_language(CUDA)
+#enable_language(CUDA)
+#include(CheckLanguage)
+#check_language(CUDA)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
