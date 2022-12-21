@@ -26,7 +26,7 @@ extern GLFWwindow* window;
 #define LAYOUT0 0
 #define LAYOUT1 1
 
-arrow::arrow(char* path_of_obj, GLuint program_Id, glm::vec3 color){
+arrow::arrow(const char* path_of_obj, GLuint program_Id, glm::vec3 color){
     m_projection_matrix =  glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 
     //Bind VAO

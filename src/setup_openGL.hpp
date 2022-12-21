@@ -27,7 +27,7 @@ template <typename T> int create_bind_VBO(GLuint &vertex_buffer_ID, std::vector<
 	return SUCCESS;
 }
 
-int get_shader_code_and_compile(GLuint &shaderID, const char* path);
+int get_shader_code_and_compile(GLuint &shaderID, const char *path);
 
 
 
@@ -43,7 +43,7 @@ double amplitude_of_vector(glm::vec3 v);
 class text_render{
 
 	public:
-		text_render(unsigned int shader_ID);
+		text_render(unsigned int shader_ID, std::string working_dir);
 		~text_render(){cleanupText2D();}
 		void update_metrics_to_screen(std::vector<glm::vec3> metrics);
 };

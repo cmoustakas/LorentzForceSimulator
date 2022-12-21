@@ -26,7 +26,7 @@
         unsigned int size_of_vertices;
         
         public:
-            arrow(char *path_of_obj, GLuint program_Id, glm::vec3 color);
+            arrow(const char* path_of_obj, GLuint program_Id, glm::vec3 color);
             void update_scale(glm::vec3 scale);
             void rotate_arrow(glm::vec3 reference_vec);
             void update_position_arrow(glm::vec3 new_position);
