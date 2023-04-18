@@ -11,3 +11,7 @@ $ ./LorentzForceSimulator
 ```
 
 Enjoy :smiling_face_with_three_hearts:
+
+
+https://user-images.githubusercontent.com/26367117/232773521-056635c1-22c3-4f7c-b85d-e947f9eed195.mp4
+
